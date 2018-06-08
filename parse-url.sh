@@ -21,21 +21,21 @@ done < urls.txt
 echo "Creating pretty reports..."
 
 # add URLs to file
-grep -B 1 301 status.txt | grep https | grep -vE '301|^--$' >> redirect_chains.txt
+grep -B 1 301 status.txt | grep https | grep -vE '301|^--$' >> TEMP.txt
 grep -B 1 404 status.txt | grep -vE '404|^--$' >> not_found.txt
 
 # add redirect chain URL to redirects
 while read LINE; do
   redirect=$(curl -Ls -o /dev/null -w %{url_effective} $LINE)
-  echo 'URL: '$LINE >> TEMP.txt
-  echo 'Redirect URL: '$redirect >> TEMP.txt
-  echo '' >> TEMP.txt
-done < redirect_chains.txt
+  # echo 'Referrer URL: SHOW CURRENT PAGE'
+  echo 'URL: '$LINE >> redirect_chains.txt
+  echo 'Redirect URL: '$redirect >> redirect_chains.txt
+  echo '' >> redirect_chains.txt
+done < TEMP.txt
 
 # this should really be done in the above while loop or using sed
-rm redirect_chains.txt
-mv TEMP.txt redirect_chains.txt
+rm TEMP.txt
 
 echo "Completed."
-echo "$(cat redirect_chains.txt | wc -l) redirects found."
+echo "$(grep 'Redirect URL:' redirect_chains.txt | wc -l) redirects found."
 echo "$(cat not_found.txt | wc -l) 404's found."
